@@ -26,6 +26,26 @@ func colorStr(color, msg string) string {
 // chatComplete send request and get response from the OpenAI
 // it uses 'gpt-3.5-turbo'
 
+var msg2 = json.RawMessage(`
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "song": {
+        "type": "string",
+        "description": "song title"
+      },
+      "artist": {
+        "type": "string",
+        "description": "artist or group name"
+      }
+    },
+    "required": ["song", "artist"]
+  }
+}
+
+`)
 var msg = json.RawMessage(`
 	{
 		"type": "object",

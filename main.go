@@ -58,19 +58,21 @@ func main() {
 func generatePlaylist(prompt string, num int) {
 	log.Println("qurate play list")
 	exampleResponse := `
-	[
-		{"song": "Everybody Hurts", "artist": "R.E.M."},
-		{"song": "Nothing Compares 2 U", "artist": "Sinead O'Connor"},
-		{"song": "Tears in Heaven", "artist": "Eric Clapton"},
-		{"song": "Hurt", "artist": "Johnny Cash"},
-		{"song": "Yesterday", "artist": "The Beatles"}
-	]
+	{
+		"songs": [
+			{"song": "Everybody Hurts", "artist": "R.E.M."},
+			{"song": "Nothing Compares 2 U", "artist": "Sinead O'Connor"},
+			{"song": "Tears in Heaven", "artist": "Eric Clapton"},
+			{"song": "Hurt", "artist": "Johnny Cash"},
+			{"song": "Yesterday", "artist": "The Beatles"}
+		]
+	}
 	`
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem, Content: `You are a helpful playlist generating assistant. 
 					You should generate a list of songs and their artists according to a text prompt.
-					Your should return a JSON array, where each element follows this format: {"song": <song_title>, "artist": <artist_name>}`,
+					`,
 		},
 		{Role: openai.ChatMessageRoleUser, Content: "Generate a playlist of 5 songs based on this prompt: super super sad songs"},
 		{Role: openai.ChatMessageRoleAssistant, Content: exampleResponse},
@@ -84,7 +86,8 @@ func generatePlaylist(prompt string, num int) {
 	log.Println("got it")
 	log.Println("len choice:", len(resp.Choices))
 	fmt.Printf("%+v", resp.Choices[0].Message.Content)
-	fmt.Printf("%+v", resp)
+	fmt.Printf("%+v", resp.Choices[0].Message.FunctionCall.Name)
+	fmt.Printf("%+v", resp.Choices[0].Message.FunctionCall.Arguments)
 	// fmt.Printf("%+v", resp.Choices[0].Content.FunctionCall)
 	// if len(resp.Functions) > 0 {
 	// 	var fcb []byte
