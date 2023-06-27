@@ -56,6 +56,7 @@ func main() {
 }
 
 func generatePlaylist(prompt string, num int) {
+	log.Println("qurate play list")
 	exampleResponse := `
 	[
 		{"song": "Everybody Hurts", "artist": "R.E.M."},
@@ -80,6 +81,20 @@ func generatePlaylist(prompt string, num int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(resp)
+	log.Println("got it")
+	log.Println("len choice:", len(resp.Choices))
+	fmt.Printf("%+v", resp.Choices[0].Message.Content)
+	fmt.Printf("%+v", resp)
+	// fmt.Printf("%+v", resp.Choices[0].Content.FunctionCall)
+	// if len(resp.Functions) > 0 {
+	// 	var fcb []byte
+	// 	b := resp.Functions[0].Parameters
+	// 	fcb, err = json.Marshal(b)
+	// 	if err != nil {
+	// 		log.Println("err:", err)
+	// 		return
+	// 	}
+	// }
+	// fmt.Println(string(fcb))
 
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -24,13 +25,47 @@ func colorStr(color, msg string) string {
 
 // chatComplete send request and get response from the OpenAI
 // it uses 'gpt-3.5-turbo'
+
+var msg = json.RawMessage(`
+	{
+		"type": "object",
+		"properties": {
+				"songs": {
+						"type": "array",
+						"items": {
+								"type": "object",
+								"properties": {
+										"song": {
+												"type": "string",
+												"description": "song title"
+										},
+										"artist": {
+												"type": "string",
+												"description": "artist or group name"
+										}
+								},
+								"required": ["song", "artist"]
+						}
+				}
+		}
+	}
+`)
+
 func chatComplete(messages []openai.ChatCompletionMessage) (openai.ChatCompletionResponse, error) {
+
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
 			Model:     "gpt-3.5-turbo-0613",
 			Messages:  messages,
 			MaxTokens: 300,
+			Functions: []openai.FunctionDefinition{
+				{
+					Name:       "SpotifyPlaylistGenerator",
+					Parameters: &msg,
+				},
+			},
+			FunctionCall: "auto",
 		},
 	)
 	return resp, err
