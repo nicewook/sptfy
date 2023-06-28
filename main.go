@@ -43,7 +43,7 @@ func main() {
 		}
 		funcName, playlist := generatePlaylist(prompt, 8)
 		if funcName == "" || len(playlist.Playlist) == 0 {
-			fmt.Println("fail to genereate playlist. try again.")
+			fmt.Println("try again. fail to genereate playlist.")
 			continue
 		}
 		// TODO

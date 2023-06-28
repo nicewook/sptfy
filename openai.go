@@ -24,7 +24,7 @@ func init() {
 
 func generatePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {
 
-	fmt.Printf("generate play list of %d tracks\n", num)
+	fmt.Printf("generating play list of %d tracks\n", num)
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
@@ -33,7 +33,7 @@ func generatePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) 
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: fmt.Sprintf("Generate a playlist of %d songs based on this prompt: %s", num, prompt),
+			Content: fmt.Sprintf("Generate a playlist of %d songs based on the prompt: ###%s### ", num, prompt),
 		},
 	}
 
@@ -42,17 +42,16 @@ func generatePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) 
 		log.Println(err)
 		return
 	}
-	fmt.Println("playlist generated.")
-	if len(resp.Choices) <= 0 && resp.Choices[0].Message.FunctionCall == nil {
-		log.Println("fail to generate playlist")
-		return
+	if resp.Choices[0].FinishReason != openai.FinishReasonFunctionCall {
+		log.Println("functions call is not activatied.")
 	}
+	fmt.Println("playlist generated.")
 
 	funcName = resp.Choices[0].Message.FunctionCall.Name
 	funcArg := resp.Choices[0].Message.FunctionCall.Arguments
 
 	if err := json.Unmarshal([]byte(funcArg), &pl); err != nil {
-		log.Println("err:", err)
+		log.Println(err)
 		return "", pl
 	}
 	return funcName, pl
