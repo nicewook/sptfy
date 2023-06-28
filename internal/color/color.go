@@ -22,6 +22,9 @@ func Red(msg string) string {
 func Green(msg string) string {
 	return colorGreen + msg + colorReset
 }
+func Blue(msg string) string {
+	return colorBlue + msg + colorReset
+}
 func Yellow(msg string) string {
 	return colorYellow + msg + colorReset
 }
