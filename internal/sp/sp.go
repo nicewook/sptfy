@@ -74,7 +74,7 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("token: %T, %+v\n", token.Expiry, token.Expiry)
+		log.Printf("token: %s, token.Expiry: %T, %+v\n", token.AccessToken, token.Expiry, token.Expiry)
 		log.Println("current time:", time.Now())
 
 	} else {
@@ -84,7 +84,8 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 			spClient = &client
 		}
 		url := auth.AuthURL(state)
-		fmt.Println("Please log in to Spotify by visiting the following page in your browser:\n", color.Yellow(url))
+
+		fmt.Println(color.Hyperlink(url, color.Yellow("Click to login to Spotify")))
 
 		// wait for auth to complete
 		spClient = <-ch
