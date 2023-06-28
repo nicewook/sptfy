@@ -1,4 +1,4 @@
-package main
+package ai
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func init() {
 	openaiClient = openai.NewClient(config.GetConfig().OpenAIAPIKey)
 }
 
-func generatePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {
+func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {
 
 	fmt.Printf("generating play list of %d tracks\n", num)
 	messages := []openai.ChatCompletionMessage{
@@ -100,4 +100,17 @@ func chatComplete(messages []openai.ChatCompletionMessage) (openai.ChatCompletio
 		},
 	)
 	return resp, err
+}
+
+func chatCompleteStream(messages []openai.ChatCompletionMessage) (*openai.ChatCompletionStream, error) {
+	stream, err := openaiClient.CreateChatCompletionStream(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:     GPTModel,
+			Messages:  messages,
+			MaxTokens: 300,
+			Stream:    true,
+		},
+	)
+	return stream, err
 }

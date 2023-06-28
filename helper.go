@@ -1,28 +1,5 @@
 package main
 
-import (
-	"context"
-
-	"github.com/sashabaranov/go-openai"
-)
-
-
-
-// chatComplete send request and get response from the OpenAI
-// it uses 'gpt-3.5-turbo'
-func chatCompleteStream(messages []openai.ChatCompletionMessage) (*openai.ChatCompletionStream, error) {
-	stream, err := openaiClient.CreateChatCompletionStream(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:     GPTModel,
-			Messages:  messages,
-			MaxTokens: 300,
-			Stream:    true,
-		},
-	)
-	return stream, err
-}
-
 // command
 // func helpMessage() string {
 // 	help := colorStr(Green, "help")

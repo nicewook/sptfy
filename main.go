@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/chzyer/readline"
+	"github.com/nicewook/sptfy/internal/ai"
 	"github.com/nicewook/sptfy/internal/sp"
 )
 
@@ -41,7 +42,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		funcName, playlist := generatePlaylist(prompt, 8)
+		funcName, playlist := ai.GeneratePlaylist(prompt, 8)
 		if funcName == "" || len(playlist.Playlist) == 0 {
 			fmt.Println("try again. fail to genereate playlist.")
 			continue
