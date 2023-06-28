@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/chzyer/readline v1.5.1
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sashabaranov/go-openai v1.12.0
 	github.com/spf13/viper v1.16.0
 	github.com/zmb3/spotify/v2 v2.3.1
@@ -14,6 +15,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/spf13/afero v1.9.5 // indirect

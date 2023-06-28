@@ -20,7 +20,6 @@ var openaiClient *openai.Client
 func init() {
 	config.InitConfig()
 	openaiClient = openai.NewClient(config.GetConfig().OpenAIAPIKey)
-	log.Println(config.GetConfig().OpenAIAPIKey)
 }
 
 func generatePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {

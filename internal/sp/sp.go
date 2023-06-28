@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/nicewook/sptfy/internal/color"
 	"github.com/nicewook/sptfy/internal/config"
+	"github.com/olekukonko/tablewriter"
+	"github.com/spf13/viper"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
@@ -74,11 +78,17 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 		log.Println("current time:", time.Now())
 
 	} else {
+		client, ok := viper.Get("spClient").(spotify.Client)
+		if ok {
+			log.Println("reuse client after restart!")
+			spClient = &client
+		}
 		url := auth.AuthURL(state)
-		fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+		fmt.Println("Please log in to Spotify by visiting the following page in your browser:\n", color.Yellow(url))
 
 		// wait for auth to complete
 		spClient = <-ch
+		viper.Set("spClient", *spClient)
 	}
 
 	// use the client to make calls that require authorization
@@ -86,10 +96,13 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("You are logged in as:", user.ID)
+	log.Println("You are logged in as:", user.ID)
 
-	ctx := context.Background()
-	var ids []spotify.ID
+	var (
+		ids    []spotify.ID
+		tracks []spotify.FullTrack
+		ctx    = context.Background()
+	)
 	for _, song := range pl.Playlist {
 		// https://developer.spotify.com/documentation/web-api/reference/#/operations/search
 		advancdQuery := fmt.Sprintf("artist:%s track:%s", song.Song, song.Artist)
@@ -102,15 +115,27 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			if len(results.Tracks.Tracks) == 0 || results.Tracks.Tracks[0].Popularity < 20 {
+			if len(results.Tracks.Tracks) == 0 {
+				log.Printf("no track found for query: %s", query)
 				continue
 			}
-			myTrack := results.Tracks.Tracks[0]
-			fmt.Printf("fount %s, id: %s\n", myTrack.Name, myTrack.ID)
-			ids = append(ids, myTrack.ID)
+			tr := results.Tracks.Tracks[0]
+			if tr.Popularity < 20 {
+				log.Printf("found for query: %s. but not much papular. %s, %s, popularity %d", query, tr.Name, tr.Artists, tr.Popularity, tr.PreviewURL)
+				continue
+			}
+
+			log.Printf("fount %s, id: %s\n", tr.Name, tr.ID)
+			ids = append(ids, tr.ID)
+			tracks = append(tracks, tr)
 		}
 	}
 
+	displayPlaylist(tracks)
+
+	// create playlist
+
+	// TODO: GPT generate playlist name and description, temperature=1
 	createdPlaylist, err := spClient.CreatePlaylistForUser(
 		ctx,
 		user.ID,
@@ -128,6 +153,22 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 	}
 	log.Println("snapshotID:", snapshotID)
 	return true
+}
+
+func displayPlaylist(tracks []spotify.FullTrack) {
+	var trackTable [][]string
+	for i, t := range tracks {
+		trackTable = append(trackTable, []string{fmt.Sprintf("%02d", i+1), t.Name, t.Artists[0].Name, t.TimeDuration().String(), fmt.Sprintf("%02d", t.Popularity), t.PreviewURL})
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+	table.SetHeader([]string{"No", "Title", "Artist", "Duration", "Popularity", "Preview URL"})
+
+	for _, v := range trackTable {
+		table.Append(v)
+	}
+	table.Render()
 }
 
 func init() {
