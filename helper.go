@@ -50,7 +50,7 @@ var msg = json.RawMessage(`
 	{
 		"type": "object",
 		"properties": {
-				"songs": {
+				"playlist": {
 						"type": "array",
 						"items": {
 								"type": "object",
