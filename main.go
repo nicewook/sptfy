@@ -51,10 +51,10 @@ func main() {
 		// 2. ask if you want to add
 		added := sp.AddPlaylistToSpotify(funcName, playlist)
 		if added {
-			fmt.Println("successfully added.")
+			fmt.Println("successfully added to Spotify.")
 			// TODO: spotify URL link
 			continue
 		}
-		fmt.Println("failed to add.")
+		fmt.Println("failed to add to Spotify.")
 	}
 }

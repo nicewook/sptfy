@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/nicewook/sptfy/internal/config"
 	"github.com/zmb3/spotify/v2"
@@ -26,9 +27,10 @@ type Playlist struct {
 const redirectURI = "http://localhost:9999/callback"
 
 var (
-	auth  *spotifyauth.Authenticator
-	ch    = make(chan *spotify.Client)
-	state = "abc123"
+	auth     *spotifyauth.Authenticator
+	spClient *spotify.Client
+	ch       = make(chan *spotify.Client)
+	state    = "abc123"
 )
 
 func completeAuth(w http.ResponseWriter, r *http.Request) {
@@ -51,22 +53,36 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 
 func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 
-	auth = spotifyauth.New(
-		spotifyauth.WithClientID(config.GetConfig().SpotifyClientID),
-		spotifyauth.WithClientSecret(config.GetConfig().SpotifyClientSecret),
-		spotifyauth.WithRedirectURL(redirectURI),
-		spotifyauth.WithScopes(spotifyauth.ScopePlaylistModifyPublic),
-	)
+	// TODO: singleton
+	if auth == nil {
+		log.Println("new auth for Spotify")
+		auth = spotifyauth.New(
+			spotifyauth.WithClientID(config.GetConfig().SpotifyClientID),
+			spotifyauth.WithClientSecret(config.GetConfig().SpotifyClientSecret),
+			spotifyauth.WithRedirectURL(redirectURI),
+			spotifyauth.WithScopes(spotifyauth.ScopePlaylistModifyPublic),
+		)
+	}
 
 	// if I have access token and not expired, no need it
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+	if spClient != nil {
+		token, err := spClient.Token()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("token: %T, %+v\n", token.Expiry, token.Expiry)
+		log.Println("current time:", time.Now())
 
-	// wait for auth to complete
-	client := <-ch
+	} else {
+		url := auth.AuthURL(state)
+		fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+
+		// wait for auth to complete
+		spClient = <-ch
+	}
 
 	// use the client to make calls that require authorization
-	user, err := client.CurrentUser(context.Background())
+	user, err := spClient.CurrentUser(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +98,7 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 		for _, query := range []string{advancdQuery, basicQuery} {
 			log.Println("search query:", query)
 			// search for albums with the name Sempiternal
-			results, err := client.Search(ctx, query, spotify.SearchTypeTrack)
+			results, err := spClient.Search(ctx, query, spotify.SearchTypeTrack)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -90,14 +106,12 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 				continue
 			}
 			myTrack := results.Tracks.Tracks[0]
-			fmt.Printf("fount %s, id: %s", myTrack.Name, myTrack.ID)
-			log.Printf("%+v", results)
+			fmt.Printf("fount %s, id: %s\n", myTrack.Name, myTrack.ID)
 			ids = append(ids, myTrack.ID)
-
 		}
 	}
 
-	createdPlaylist, err := client.CreatePlaylistForUser(
+	createdPlaylist, err := spClient.CreatePlaylistForUser(
 		ctx,
 		user.ID,
 		"my playlist by GPT",
@@ -108,7 +122,7 @@ func AddPlaylistToSpotify(funcName string, pl Playlist) (added bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	snapshotID, err := client.AddTracksToPlaylist(ctx, createdPlaylist.ID, ids...)
+	snapshotID, err := spClient.AddTracksToPlaylist(ctx, createdPlaylist.ID, ids...)
 	if err != nil {
 		log.Fatal(err)
 	}
