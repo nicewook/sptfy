@@ -85,8 +85,8 @@ func AddPlaylistToSpotify(playlistName string, pl Playlist) (added bool) {
 	// need to login
 	if spClient == nil {
 		url := auth.AuthURL(state)
-		fmt.Println(color.Blue("Create a playlist on Spotify!"))
-		fmt.Println(color.Hyperlink(url, color.Yellow("Click to login!")))
+		fmt.Println(color.Blue("Create a playlist on Spotify"))
+		fmt.Println(color.Hyperlink(url, color.Yellow("Click to authenticate to Spotify!")))
 		spClient = <-ch // wait for auth to complete
 	}
 

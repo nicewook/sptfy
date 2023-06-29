@@ -101,7 +101,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 
 func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {
 
-	fmt.Println(color.Blue(fmt.Sprintf("Generating playlist of %d(or less) tracks!", num)))
+	fmt.Println(color.Blue(fmt.Sprintf("Generating playlist of %d tracks. Note: actual songs may be less depending on matching.", num)))
 	loading := spinner.New([]string{".", "..", "...", "....", "....."}, 150*time.Millisecond)
 	loading.Prefix = color.Yellow("loading")
 	loading.Color("yellow")
@@ -114,7 +114,7 @@ func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) 
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: fmt.Sprintf("Generate a playlist of %d songs based on the prompt: ###%s### ", num, prompt),
+			Content: fmt.Sprintf("Generate a playlist of %d songs based on the prompt: %s", num, prompt),
 		},
 	}
 
