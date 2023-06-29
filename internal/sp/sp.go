@@ -39,7 +39,6 @@ var (
 
 func init() {
 	state = generateState()
-	log.Println("random state:", state)
 
 	// first start an HTTP server for OAuth
 	http.HandleFunc("/callback", completeAuth)
