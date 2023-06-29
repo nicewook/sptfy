@@ -57,7 +57,6 @@ func main() {
 		if !added {
 			fmt.Println("failed to add to Spotify.")
 		}
-		fmt.Println("--")
 	}
 }
 
