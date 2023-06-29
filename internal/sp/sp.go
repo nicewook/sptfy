@@ -10,7 +10,7 @@ import (
 
 	"github.com/nicewook/sptfy/internal/color"
 	"github.com/nicewook/sptfy/internal/config"
-	"github.com/olekukonko/tablewriter"
+	tw "github.com/olekukonko/tablewriter"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
@@ -165,15 +165,24 @@ func AddPlaylistToSpotify(playlistName string, pl Playlist) (added bool) {
 func displayPlaylist(tracks []spotify.FullTrack) {
 	var trackTable [][]string
 	for i, t := range tracks {
-		trackTable = append(trackTable, []string{fmt.Sprintf("%02d", i+1), t.Name, t.Artists[0].Name, t.TimeDuration().String(), fmt.Sprintf("%02d", t.Popularity), t.PreviewURL})
+		trackTable = append(trackTable, []string{fmt.Sprintf("%02d", i+1), t.Name, t.Artists[0].Name, formatPlaytime(t.TimeDuration()), fmt.Sprintf("%02d", t.Popularity), t.PreviewURL})
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tw.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
-	table.SetHeader([]string{"No", "Title", "Artist", "Duration", "Popularity", "Preview URL"})
+	table.SetHeader([]string{"No", "Title", "Artist", "Play time", "Popularity", "Preview URL"})
+	table.SetAutoFormatHeaders(false)
+	table.SetColumnAlignment([]int{tw.ALIGN_CENTER, tw.ALIGN_LEFT, tw.ALIGN_LEFT, tw.ALIGN_RIGHT, tw.ALIGN_CENTER, tw.ALIGN_LEFT})
 
 	for _, v := range trackTable {
 		table.Append(v)
 	}
 	table.Render()
+}
+
+func formatPlaytime(playtime time.Duration) string {
+	minutes := int(playtime.Minutes())
+	seconds := int(playtime.Seconds()) - (minutes * 60)
+
+	return fmt.Sprintf("%01d:%02d", int(minutes), int(seconds))
 }
