@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -33,10 +34,13 @@ var (
 	auth     *spotifyauth.Authenticator
 	spClient *spotify.Client
 	ch       = make(chan *spotify.Client)
-	state    = "abc123"
+	state    string
 )
 
 func init() {
+	state = generateState()
+	log.Println("random state:", state)
+
 	// first start an HTTP server for OAuth
 	http.HandleFunc("/callback", completeAuth)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +53,17 @@ func init() {
 			log.Fatal(err)
 		}
 	}()
+}
+
+func generateState() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+	b := make([]rune, 10)
+	for i := range b {
+		b[i] = letterRunes[r.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 func completeAuth(w http.ResponseWriter, r *http.Request) {

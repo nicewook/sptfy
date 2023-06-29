@@ -63,7 +63,8 @@ func main() {
 func getPrompt(rl *readline.Instance) (string, int) {
 	fmt.Println(color.Blue("Let's make a playlist to Spotify!"))
 	fmt.Println()
-	fmt.Printf(`Describe music playlist you want to listen to (e.g., "relaxing jazz", "upbeat workout music")(or %s):\n`, color.Yellow("exit, q"))
+	fmt.Printf(`Describe music playlist you want to listen to (e.g., "relaxing jazz", "upbeat workout music")(or %s):`, color.Yellow("exit, q"))
+	fmt.Println()
 	prompt, err := rl.Readline()
 	if err == readline.ErrInterrupt {
 		if len(prompt) == 0 {

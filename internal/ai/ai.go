@@ -43,7 +43,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: fmt.Sprintf(`Generate a Spotify playlist name based on the prompt: ###sunny###, and generated playlist below
+			Content: `Generate a Spotify playlist name based on the prompt: ###sunny###, and based on generated playlist below
 			{
 				"playlist": [
 					{
@@ -65,7 +65,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 				]
 			}
 
-      Output format is only generated playlist name itself`, prompt, playlist),
+      Output format is only generated playlist name itself`,
 		},
 		{
 			Role:    openai.ChatMessageRoleAssistant,
@@ -73,7 +73,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: fmt.Sprintf(`Generate a Spotify playlist name based on the prompt: ###%s###, and generated playlist below\n%s
+			Content: fmt.Sprintf(`Generate a Spotify playlist name based on the prompt: ###%s###, and based on generated playlist below\n%s
 			Output format is only generated playlist name itself`, prompt, playlist),
 		},
 	}
@@ -176,7 +176,7 @@ func chatComplete(messages []openai.ChatCompletionMessage, useFunction bool) (op
 	req := openai.ChatCompletionRequest{
 		Model:     GPTModel,
 		Messages:  messages,
-		MaxTokens: 300,
+		MaxTokens: 1000,
 	}
 
 	if useFunction {
@@ -202,7 +202,7 @@ func chatCompleteStream(messages []openai.ChatCompletionMessage) (*openai.ChatCo
 		openai.ChatCompletionRequest{
 			Model:     GPTModel,
 			Messages:  messages,
-			MaxTokens: 300,
+			MaxTokens: 1000,
 			Stream:    true,
 		},
 	)
