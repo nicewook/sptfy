@@ -42,7 +42,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 								The name should not be over 10 words`,
 		},
 		{
-			Role:    openai.ChatMessageRoleUser,
+			Role: openai.ChatMessageRoleUser,
 			Content: `Generate a Spotify playlist name based on the prompt: ###sunny###, and based on generated playlist below
 			{
 				"playlist": [
@@ -72,7 +72,7 @@ func GeneratePlayListName(prompt, playlist string) string {
 			Content: "Sunny day afternoon, with music",
 		},
 		{
-			Role:    openai.ChatMessageRoleUser,
+			Role: openai.ChatMessageRoleUser,
 			Content: fmt.Sprintf(`Generate a Spotify playlist name based on the prompt: ###%s###, and based on generated playlist below\n%s
 			Output format is only generated playlist name itself`, prompt, playlist),
 		},
@@ -93,15 +93,15 @@ func GeneratePlayListName(prompt, playlist string) string {
 	if resp.Choices[0].FinishReason != openai.FinishReasonStop {
 		return prompt
 	}
-	
+
 	playlistName := resp.Choices[0].Message.Content
 	return playlistName
 
 }
 
-func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) {
+func GeneratePlaylist(prompt string) (funcName string, pl sp.Playlist) {
 
-	fmt.Println(color.Blue(fmt.Sprintf("Generating playlist of %d tracks. Note: actual songs may be less depending on matching.", num)))
+	fmt.Println(color.Blue("Generating playlist"))
 	loading := spinner.New([]string{".", "..", "...", "....", "....."}, 150*time.Millisecond)
 	loading.Prefix = color.Yellow("loading")
 	loading.Color("yellow")
@@ -114,7 +114,7 @@ func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) 
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: fmt.Sprintf("Generate a playlist of %d songs based on the prompt: %s", num, prompt),
+			Content: fmt.Sprintf("Generate a playlist based on the user's answers related playlist below:\n %s", prompt),
 		},
 	}
 
@@ -138,6 +138,7 @@ func GeneratePlaylist(prompt string, num int) (funcName string, pl sp.Playlist) 
 
 	funcName = resp.Choices[0].Message.FunctionCall.Name
 	funcArg := resp.Choices[0].Message.FunctionCall.Arguments
+	log.Println("generated playlist:", funcArg)
 
 	if err := json.Unmarshal([]byte(funcArg), &pl); err != nil {
 		log.Println(err)

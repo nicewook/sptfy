@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -32,10 +31,11 @@ func main() {
 
 	for {
 		fmt.Println()
-		prompt, num := getPrompt(rl)
+
+		prompt := getPrompt(rl)
 		fmt.Println()
 
-		funcName, playlist := ai.GeneratePlaylist(prompt, num)
+		funcName, playlist := ai.GeneratePlaylist(prompt)
 		fmt.Println()
 
 		if funcName == "" || len(playlist.Playlist) == 0 {
@@ -60,11 +60,78 @@ func main() {
 	}
 }
 
-func getPrompt(rl *readline.Instance) (string, int) {
+const (
+	q01 = "Q: What is the primary purpose of this playlist? (For example, workout, study, party, relaxation, driving, commute, reading.)"
+
+	q02 = "Q: Can you name a few artists or bands that you would like to include in this playlist? We will also add musicians of similar taste."
+
+	q03 = "Q: Are there any specific songs you would like me to add to the playlist? We will also add songs of similar taste."
+
+	q04 = "Q: What genre or style of music do you prefer? (For example, pop, rock, country, classical, hip-hop, jazz.)"
+
+	q05 = "Q: Do you have any preferences for a particular era or time period of music? (For example, 80s, 90s, modern.)"
+
+	q06 = "Q: What kind of mood would you like the playlist to convey? (For example, happy, sad, energetic, chill, romantic.)"
+
+	q07 = "Q: Would you like the playlist to include songs with lyrics, instrumental tracks, or a mix of both?"
+
+	q08 = "Q: Do you have any preference for the language or contury of the songs?"
+
+	q09 = "Q: How long do you want the playlist to be? (For example, a certain number of songs, or a certain duration in hours or minutes)"
+
+	q10 = "Q: Are you open to discovering new artists or songs that are similar to your preferences?"
+
+	q11 = "Q: Would you like a variety of tempos in the playlist or would you prefer a consistent tempo?"
+)
+
+// exmample
+// Q: What is the primary purpose of this playlist? (For example, workout, study, party, relaxation, driving, commute.)A: commte
+// Q: Can you name a few artists or bands that you would like to include in this playlist?A: fabrizio paterlini
+// Q: Are there any specific songs you would like me to add to the playlist?A:
+// Q: What genre or style of music do you prefer? (For example, pop, rock, country, classical, hip-hop, jazz.)A: jazz
+// Q: Do you have any preferences for a particular era or time period of music? (For example, 80s, 90s, modern.)A:
+// Q: What kind of mood would you like the playlist to convey? (For example, happy, sad, energetic, chill, romantic.)A: chill
+// Q: Would you like the playlist to include songs with lyrics, instrumental tracks, or a mix of both?A: instrumental
+// Q: Do you have any preference for the language or contury of the songs?A: nope
+// Q: How long do you want the playlist to be? (For example, a certain number of songs, or a certain duration in hours or minutes)A: 20 min
+// Q: Are you open to discovering new artists or songs that are similar to your preferences?A: yes
+// Q: Would you like a variety of tempos in the playlist or would you prefer a consistent tempo?A: consistent
+
+func getPrompt(rl *readline.Instance) string {
+	var result string
 	fmt.Println(color.Blue("Let's make a playlist to Spotify!"))
-	fmt.Println()
-	fmt.Printf(`Describe music playlist you want to listen to (e.g., "relaxing jazz", "upbeat workout music")(or %s):`, color.Yellow("exit, q"))
-	fmt.Println()
+	fmt.Printf("Answer following questions to generate a better playlist of your taste(or %s to quit):\n", color.Yellow("exit, q"))
+	fmt.Printf("Also, you can skip the question by %s\n", "pressing enter or type skip")
+
+	getAnswer(rl, q01, &result)
+	getAnswer(rl, q02, &result)
+	getAnswer(rl, q03, &result)
+	getAnswer(rl, q04, &result)
+	getAnswer(rl, q05, &result)
+	getAnswer(rl, q06, &result)
+	getAnswer(rl, q07, &result)
+	getAnswer(rl, q08, &result)
+	getAnswer(rl, q09, &result)
+	getAnswer(rl, q10, &result)
+	getAnswer(rl, q11, &result)
+
+	log.Println("final prompt:", result)
+
+	return result
+}
+
+func getAnswer(rl *readline.Instance, question string, result *string) {
+	fmt.Println(question)
+	input := getInput(rl)
+	log.Println("input:", input)
+	if input != "" && input != "skip" {
+		// *result += fmt.Sprintln(question)
+		*result += question
+		*result += fmt.Sprintln("A:", input)
+	}
+}
+
+func getInput(rl *readline.Instance) string {
 	prompt, err := rl.Readline()
 	if err == readline.ErrInterrupt {
 		if len(prompt) == 0 {
@@ -78,24 +145,5 @@ func getPrompt(rl *readline.Instance) (string, int) {
 		fmt.Println(color.Green("good bye"))
 		os.Exit(0)
 	}
-	fmt.Println("How many songs? (4 to 20):")
-
-	numStr, err := rl.Readline()
-	if err == readline.ErrInterrupt {
-		if len(prompt) == 0 {
-			log.Fatal("interrupted")
-		}
-	} else if err != nil {
-		log.Fatal(err)
-	}
-	numStr = strings.TrimSpace(numStr)
-	if numStr == "exit" || numStr == "q" {
-		fmt.Println(color.Green("good bye"))
-		os.Exit(0)
-	}
-	num, err := strconv.Atoi(numStr)
-	if err != nil || (num < 4 && num > 20) {
-		fmt.Println(color.Red("try again. it should be a number from 4 to 20"))
-	}
-	return prompt, num
+	return prompt
 }
